@@ -2,8 +2,23 @@
 		$(document).ready(function() {
 			var $tr = $('<tr>');
 			var firstRow = true;
-			$.getJSON('http://webprojects.csumb.edu/quail/mirror.php?p=kevee/quail/yaml-config/dist/tests.json', function(tests) {
-				$.getJSON('http://webprojects.csumb.edu/quail/mirror.php?p=kevee/quail/yaml-config/dist/guidelines/wcag.json', function(guideline) {
+			$.getJSON('/dist/tests.json', function(tests) {
+				var testAlignment = {sc : {}, technique : {}};
+				$.each(tests, function(testName, test) {
+					if(typeof test.guidelines.wcag !== 'undefined') {
+						$.each(test.guidelines.wcag, function(sc, scTest) {
+							if(typeof scTest.techniques !== 'undefined') {
+								$.each(scTest.techniques, function(index, technique) {
+									if(typeof testAlignment.technique[technique] === 'undefined') {
+										testAlignment.technique[technique] = {};
+									}
+									testAlignment.technique[technique][testName] = testName;
+								});
+							}
+						});
+					}
+				});
+				$.getJSON('/dist/guidelines/wcag.json', function(guideline) {
 					$.each(guideline.guidelines, function(id, sc) {
 						$tr = $('<tr>');
 						$tr.append('<td rowspan="' + sc.techniques.length + '"><strong>' + id + '</strong> ' + sc.title + '</td>');
@@ -13,9 +28,9 @@
 								$tr = $('<tr>');
 							}
 							$tr.append('<td><strong>' + technique + '</strong> ' + guideline.techniques[technique].description + '</td>');
-							if(typeof guideline.techniques[technique].tests !== 'undefined') {
+							if(typeof testAlignment.technique[technique] !== 'undefined') {
 								$ul = $('<ul>');
-								$.each(guideline.techniques[technique].tests, function(testId, test) {
+								$.each(testAlignment.technique[technique], function(test) {
 									$ul.append('<li><a href="http://quail.readthedocs.org/en/latest/tests/"' + test +'.html">' + test + '</a></li>');
 									delete tests[test];
 								});
