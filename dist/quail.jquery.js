@@ -80,7 +80,7 @@ var quail = {
       }
     }
     if(typeof quail.options.guideline === 'string') {
-      $.ajax({ url : quail.options.jsonPath + '/guidelines/' + quail.options.guideline +'.json',
+      $.ajax({ url : quail.options.jsonPath + '/guidelines/' + quail.options.guideline +'.tests.json',
                async : false,
                dataType : 'json',
                success : function(data) {
@@ -103,6 +103,16 @@ var quail = {
       });
       quail.options.complete(results);
     }
+  },
+
+  getConfiguration : function(testName) {
+    if(typeof this.options.guidelineName === 'undefined' ||
+       typeof this.accessibilityTests[testName].guidelines === 'undefined' ||
+       typeof this.accessibilityTests[testName].guidelines[this.options.guidelineName] === 'undefined' ||
+       typeof this.accessibilityTests[testName].guidelines[this.options.guidelineName].configuration === 'undefined') {
+      return false;
+    }
+    return this.accessibilityTests[testName].guidelines[this.options.guidelineName].configuration;
   },
   
   /**
