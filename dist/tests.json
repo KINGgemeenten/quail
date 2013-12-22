@@ -308,7 +308,16 @@
     ],
     "testability": 0,
     "type": "selector",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "2.4.9": {
+          "techniques": [
+            "H33",
+            "H25"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "The title attribute of all source a (anchor) elements describes the link destination."
     },
@@ -399,16 +408,6 @@
             "G74",
             "H35"
           ]
-        },
-        "1.4.3": {
-          "techniques": [
-            "G18"
-          ]
-        },
-        "1.4.6": {
-          "techniques": [
-            "G18"
-          ]
         }
       }
     },
@@ -448,7 +447,15 @@
     "guidelines": {
       "508": [
         "m"
-      ]
+      ],
+      "wcag": {
+        "1.1.1": {
+          "techniques": [
+            "G74",
+            "H35"
+          ]
+        }
+      }
     }
   },
   "appletUIMustBeAccessible": {
@@ -463,7 +470,15 @@
     "guidelines": {
       "508": [
         "m"
-      ]
+      ],
+      "wcag": {
+        "1.1.1": {
+          "techniques": [
+            "G74",
+            "H35"
+          ]
+        }
+      }
     },
     "title": {
       "en": "Any user interface in an applet must be accessible"
@@ -591,7 +606,8 @@
         "1.1.1": {
           "techniques": [
             "F65",
-            "G74"
+            "G74",
+            "H24"
           ]
         },
         "1.4.3": {
@@ -880,7 +896,8 @@
         },
         "1.3.1": {
           "techniques": [
-            "H44"
+            "H44",
+            "F68"
           ]
         },
         "3.3.2": {
@@ -967,7 +984,15 @@
     ],
     "testability": 1,
     "type": "color",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.4.3": {
+          "techniques": [
+            "G18"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "All elements should have appropriate color contrast"
     },
@@ -1184,7 +1209,15 @@
     ],
     "testability": 1,
     "type": "selector",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "2.4.2": {
+          "techniques": [
+            "H25"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "The document should have a title element"
     },
@@ -1227,7 +1260,15 @@
     ],
     "testability": 0.5,
     "type": "custom",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "3.1.5": {
+          "techniques": [
+            "G86"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "The document should be written to the target audience and read clearly"
     },
@@ -1311,7 +1352,15 @@
     ],
     "testability": 0.5,
     "type": "selector",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.2": {
+          "techniques": [
+            "H34"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "Reading direction of text is correctly marked"
     },
@@ -1468,7 +1517,16 @@
     ],
     "testability": 1,
     "type": "custom",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "H28",
+            "T2"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "Visual lists of items are marked using ordered or unordered lists"
     },
@@ -1483,7 +1541,15 @@
     ],
     "testability": 0,
     "type": "selector",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "3.1.2": {
+          "techniques": [
+            "H58"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "Any words or phrases which are not the document's primary language should be marked"
     },
@@ -1500,7 +1566,15 @@
     ],
     "testability": 1,
     "type": "custom",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.1.1": {
+          "techniques": [
+            "H46"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "All \"embed\" elements have an associated \"noembed\" element"
     },
@@ -1569,7 +1643,15 @@
     ],
     "testability": 0.5,
     "type": "custom",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.1.1": {
+          "techniques": [
+            "H86"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "Emoticons should not be used excessively"
     },
@@ -1626,7 +1708,8 @@
         },
         "1.3.1": {
           "techniques": [
-            "H44"
+            "H44",
+            "F68"
           ]
         },
         "3.3.2": {
@@ -1756,9 +1839,15 @@
             "ARIA2"
           ]
         },
+        "1.4.1": {
+          "techniques": [
+            "F81"
+          ]
+        },
         "3.3.2": {
           "techniques": [
-            "ARIA2"
+            "ARIA2",
+            "H90"
           ]
         },
         "3.3.3": {
@@ -1978,7 +2067,15 @@
     ],
     "testability": 0,
     "type": "header",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "2.4.6": {
+          "techniques": [
+            "G130"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "The header following an h1 is h1 or h2"
     },
@@ -1997,7 +2094,15 @@
     ],
     "testability": 0,
     "type": "selector",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "T3"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "All h1 elements are not used for formatting"
     },
@@ -2016,7 +2121,15 @@
     ],
     "testability": 0,
     "type": "header",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "2.4.6": {
+          "techniques": [
+            "G130"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "The header following an h2 is h1, h2 or h3"
     },
@@ -2035,7 +2148,15 @@
     ],
     "testability": 0,
     "type": "selector",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "T3"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "All h2 elements are not used for formatting"
     },
@@ -2054,7 +2175,15 @@
     ],
     "testability": 0,
     "type": "header",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "2.4.6": {
+          "techniques": [
+            "G130"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "The header following an h3 is h1, h2, h3 or h4"
     },
@@ -2073,7 +2202,15 @@
     ],
     "testability": 0,
     "type": "selector",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "T3"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "All h3 elements are not used for formatting"
     },
@@ -2092,7 +2229,15 @@
     ],
     "testability": 0,
     "type": "header",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "2.4.6": {
+          "techniques": [
+            "G130"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "The header following an h4 is h1, h2, h3, h4 or h5"
     },
@@ -2111,7 +2256,15 @@
     ],
     "testability": 0,
     "type": "selector",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "T3"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "All h4 elements are not used for formatting"
     },
@@ -2130,7 +2283,15 @@
     ],
     "testability": 0,
     "type": "header",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "2.4.6": {
+          "techniques": [
+            "G130"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "The header following an h5 is h6 or any header less than h6"
     },
@@ -2146,7 +2307,15 @@
     ],
     "testability": 0,
     "type": "selector",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "T3"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "All h5 elements are not used for formatting"
     },
@@ -2162,7 +2331,15 @@
     ],
     "testability": 0,
     "type": "selector",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "T3"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "All h6 elements are not used for formatting"
     },
@@ -2744,7 +2921,15 @@
     ],
     "testability": 1,
     "type": "custom",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "3.3.2": {
+          "techniques": [
+            "H71"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "Logical groups of check boxes should be grouped with a \"fieldset"
     },
@@ -3038,7 +3223,8 @@
         },
         "1.3.1": {
           "techniques": [
-            "H44"
+            "H44",
+            "F68"
           ]
         },
         "3.3.2": {
@@ -3190,7 +3376,8 @@
         },
         "1.3.1": {
           "techniques": [
-            "H44"
+            "H44",
+            "F68"
           ]
         },
         "3.3.2": {
@@ -3509,18 +3696,7 @@
     ],
     "testability": 0,
     "type": "selector",
-    "guidelines": {
-      "508": [
-        "a"
-      ],
-      "wcag": {
-        "1.3.1": {
-          "techniques": [
-            "H39"
-          ]
-        }
-      }
-    },
+    "guidelines": [],
     "title": {
       "en": "Objects which reference multimedia files should also provide a link to a transcript"
     },
@@ -3777,7 +3953,8 @@
         },
         "1.3.1": {
           "techniques": [
-            "H44"
+            "H44",
+            "F68"
           ]
         },
         "3.3.2": {
@@ -3873,7 +4050,8 @@
         },
         "1.3.1": {
           "techniques": [
-            "H44"
+            "H44",
+            "F68"
           ]
         },
         "3.3.2": {
@@ -4323,7 +4501,8 @@
         },
         "1.3.1": {
           "techniques": [
-            "H44"
+            "H44",
+            "F68"
           ]
         },
         "3.3.2": {
@@ -4622,7 +4801,15 @@
     ],
     "testability": 1,
     "type": "custom",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "F46"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "All tables used for layout have no \"caption\" element"
     },
@@ -4639,7 +4826,15 @@
     ],
     "testability": 0.5,
     "type": "custom",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "F46"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "All tables used for layout have no summary or an empty summary"
     },
@@ -4672,7 +4867,15 @@
     ],
     "testability": 0.5,
     "type": "custom",
-    "guidelines": []
+    "guidelines": {
+      "wcag": {
+        "1.3.2": {
+          "techniques": [
+            "F49"
+          ]
+        }
+      }
+    }
   },
   "tableSummaryDescribesTable": {
     "selector": "table[summary]",
@@ -4793,7 +4996,15 @@
     ],
     "testability": 1,
     "type": "selector",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "H39"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "Data tables should contain a \"caption\" element if not described elsewhere"
     },
@@ -4809,7 +5020,15 @@
     ],
     "testability": 0.5,
     "type": "custom",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "H63"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "Data tables should use scoped headers for rows with headers"
     },
@@ -4868,7 +5087,23 @@
     ],
     "testability": 0.5,
     "type": "custom",
-    "guidelines": [],
+    "guidelines": {
+      "wcag": {
+        "1.3.1": {
+          "techniques": [
+            "F33",
+            "F34",
+            "F48"
+          ]
+        },
+        "1.3.2": {
+          "techniques": [
+            "F33",
+            "F34"
+          ]
+        }
+      }
+    },
     "title": {
       "en": "All tabular information should use a table"
     },
@@ -4915,7 +5150,8 @@
         },
         "1.3.1": {
           "techniques": [
-            "H44"
+            "H44",
+            "F68"
           ]
         },
         "3.3.2": {
