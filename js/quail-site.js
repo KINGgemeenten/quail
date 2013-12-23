@@ -30,7 +30,7 @@
           $.each(test.guidelines, function(name, guideline) {
             guidelines.push(name);
           });
-          $('#tests tbody').append('<tr><td>' + title +'</td><td>' + index + '</td><td>' + test.tags.join(', ') + '</td><td>' + severity[test.testability] +'</td><td>' + guidelines.join(', ') + '</td></tr>');
+          $('#tests tbody').append('<tr><td><a href="/tests/view#' + index + '">' + title +'</a></td><td>' + index + '</td><td>' + test.tags.join(', ') + '</td><td>' + severity[test.testability] +'</td><td>' + guidelines.join(', ') + '</td></tr>');
         });
       });
     }

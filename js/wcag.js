@@ -31,7 +31,7 @@
 							if(typeof testAlignment.technique[technique] !== 'undefined') {
 								$ul = $('<ul>');
 								$.each(testAlignment.technique[technique], function(test) {
-									$ul.append('<li><a href="http://quail.readthedocs.org/en/latest/tests/' + test +'.html">' + test + '</a></li>');
+									$ul.append('<li><a href="/tests/view#' + test +'">' + test + '</a></li>');
 									delete tests[test];
 								});
 								$tr.append('<td>' + $ul.html() + '</td>');

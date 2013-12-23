@@ -21,7 +21,7 @@
 						$ul = $('<ul>');
 						if(typeof testAlignment[id] !== 'undefined') {
 							$.each(testAlignment[id], function(testName, test) {
-								$ul.append('<li><a href="http://quail.readthedocs.org/en/latest/tests/' + testName +'.html">' + testName + '</a></li>');
+								$ul.append('<li><a href="/tests/view#' + testName +'.html">' + testName + '</a></li>');
 							});
 							$tr.append('<td>' + $ul.html() + '</td>');
 						}
