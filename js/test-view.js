@@ -4,7 +4,7 @@
 		if(!testName) {
 			return;
 		}
-		$.getJSON('/dist/tests.json', function(tests) {
+		$.getJSON('/dist/tests.min.json', function(tests) {
 			var test = tests[testName];
 			if(typeof test === 'undefined') {
 
