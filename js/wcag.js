@@ -32,6 +32,7 @@
 								$ul = $('<ul>');
 								$.each(testAlignment.technique[technique], function(test) {
 									$ul.append('<li><a href="http://quail.readthedocs.org/en/latest/tests/' + test +'.html">' + test + '</a></li>');
+									delete tests[test];
 								});
 								$tr.append('<td>' + $ul.html() + '</td>');
 							}
@@ -43,6 +44,9 @@
 						});
 					});
 					$('#loading').remove();
+					$.each(tests, function(testId, test) {
+						$('#orphans').append('<li><a href="http://quail.readthedocs.org/en/latest/tests/' + testId + '.html">' + testId + '</a></li>');
+					});
 				});
 			});
 		});

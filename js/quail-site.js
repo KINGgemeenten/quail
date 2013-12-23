@@ -18,9 +18,19 @@
         	                    }});
     });
     if($('#tests').length) {
-      $.getJSON('/tests/test_texts.json', function(data) {
+      var severity = {
+        0     : '<span class="label label-success">Suggestion</span>',
+        0.5   : '<span class="label label-primary">Moderate</span>',
+        1     : '<span class="label label-danger">Severe</span>'
+      };
+      $.getJSON('/dist/tests.min.json', function(data) {
         $.each(data, function(index, test) {
-          $('#tests tbody').append('<tr><td>' + test.readableName +'</td><td>' + index + '</td><td>' + test.type + '</td><td>' + test.severity +'</td><td></td></tr>');
+          var title = (typeof test.title !== 'undefined') ? test.title.en : 'No title';
+          var guidelines = [];
+          $.each(test.guidelines, function(name, guideline) {
+            guidelines.push(name);
+          });
+          $('#tests tbody').append('<tr><td>' + title +'</td><td>' + index + '</td><td>' + test.tags.join(', ') + '</td><td>' + severity[test.testability] +'</td><td>' + guidelines.join(', ') + '</td></tr>');
         });
       });
     }
