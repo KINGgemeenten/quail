@@ -2,7 +2,7 @@
 		$(document).ready(function() {
 			var $tr = $('<tr>'),
 				  $ul = $('<ul>');
-			$.getJSON('/dist/tests.json', function(tests) {
+			$.getJSON('/dist/tests.min.json', function(tests) {
 				var testAlignment = {};
 				$.each(tests, function(testName, test) {
 					if(typeof test.guidelines['508'] !== 'undefined') {
