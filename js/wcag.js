@@ -2,7 +2,7 @@
 		$(document).ready(function() {
 			var $tr = $('<tr>');
 			var firstRow = true;
-			$.getJSON('/dist/tests.json', function(tests) {
+			$.getJSON('/dist/tests.min.json', function(tests) {
 				var testAlignment = {sc : {}, technique : {}};
 				$.each(tests, function(testName, test) {
 					if(typeof test.guidelines.wcag !== 'undefined') {
