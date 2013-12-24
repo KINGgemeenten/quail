@@ -42,3 +42,8 @@ h1.quail-front {
 }
 
 .quail-message { padding: 4px; border-radius: 2px; background: #d8b3b3; }
+
+textarea#help {
+  font-family: 'Andale Mono', monospace;
+  min-height: 200px;
+}
