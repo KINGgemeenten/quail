@@ -20,14 +20,14 @@
 				});
 				$.getJSON('/dist/guidelines/wcag.json', function(guideline) {
 					$.each(guideline.guidelines, function(id, sc) {
-						$tr = $('<tr>');
+						$tr = $('<tr id="' + id + '">');
 						$tr.append('<td rowspan="' + sc.techniques.length + '"><strong>' + id + '</strong> ' + sc.title + '</td>');
 						firstRow = true;
 						$.each(sc.techniques, function(techniqueId, technique) {
 							if(!firstRow) {
 								$tr = $('<tr>');
 							}
-							$tr.append('<td><strong>' + technique + '</strong> ' + guideline.techniques[technique].description + '</td>');
+							$tr.append('<td id="' + id.replace(/\./g, '-') + '-' + technique + '"><strong>' + technique + '</strong> ' + guideline.techniques[technique].description + '</td>');
 							if(typeof testAlignment.technique[technique] !== 'undefined') {
 								$ul = $('<ul>');
 								$.each(testAlignment.technique[technique], function(test) {
@@ -44,9 +44,9 @@
 						});
 					});
 					$('#loading').remove();
-					$.each(tests, function(testId, test) {
-						$('#orphans').append('<li><a href="http://quail.readthedocs.org/en/latest/tests/' + testId + '.html">' + testId + '</a></li>');
-					});
+					if(typeof window.location.hash !== 'undefined' && window.location.hash) {
+						$(window).scrollTop($(window.location.hash).offset().top);
+					}
 				});
 			});
 		});
