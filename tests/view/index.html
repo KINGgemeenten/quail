@@ -42,17 +42,18 @@ script: /js/test-view.js
 			{{/each}}
 			</ul>
 			{{/if}}
-			{{#if reviewed }}
+			{{!--
+				{{#if reviewed }}
 				<div class="alert alert-info"><strong>Test reviewed</strong> Someone has re-written the description of this test.</div>
 			{{else}}
 				<h2>Help this test out</h2>
 				<form>
 					<div class="form-group">
 						<label for="help">This test needs an updated title and description. Provide one below (HTML OK):</label>
-						<textarea id="help" class="form-control">Title
+						<textarea id="help" class="form-control">{{ title.en }}
 -----
 
-Please provide a short paragraph, you can link to external resources but they should be official (like W3C pages).
+{{description.en}}
 </textarea>
 					</div>
 					<div class="form-group">
@@ -60,6 +61,7 @@ Please provide a short paragraph, you can link to external resources but they sh
 					</div>
 				</form>
 			{{/if}}
+			--}}
 		</div>
 		<div class="col-md-6">
 			<h2>Raw JSON</h2>

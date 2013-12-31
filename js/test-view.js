@@ -28,10 +28,10 @@
 				$('#test').html(template(test)).find('form').on('submit', function(e) {
 					e.preventDefault();
 					var data = {
-			      'description': '#quailtest Quail description for ' + testName,
+			      'description': 'Quail description for ' + testName,
 			      'public': true,
 			      'files': {
-			        'description.html': {
+			        'quail.html': {
 			          'content': $('#help').val()
 			        }
 			      }
@@ -43,6 +43,7 @@
 			      data: JSON.stringify(data)
 			    })
 			    .success(function(result) {
+			    	console.log(result);
 			    	$('#test form').prepend('<div class="alert alert-success">Thanks, we\'ll take a look!</div>');
 
 			    })
