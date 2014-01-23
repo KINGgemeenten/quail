@@ -87,11 +87,13 @@
 			saveAs(blob, "quail-custom.js");
 		});
 		$('#download-config').on('click keyup', function(event) {
+			event.preventDefault();
 			updateConfig();
 			var blob = new Blob([JSON.stringify(config, null, 2)], {type: "text/json;charset=utf-8"});
 			saveAs(blob, "quail-config.json");
 		});
 		$('#download-link').on('click keyup', function(event) {
+			event.preventDefault();
 			var data = {
 	      "description": "Quail builder configuration",
 	      "public": true,
