@@ -1,0 +1,66 @@
+---
+layout: default
+title: Build
+script: /js/build.js
+---
+<div class="page-header">
+	<h1>Build your own quail</h1>
+</div>
+
+<p class="lead">
+Quail comes with over <a href="/tests">200 tests</a>, but you probably don't want to run all of them at once. Here you can add or remove tests, customize feedback, and download only the components you need for your site.
+</p>
+<form id="builder">
+	<div class="row">
+			<div class="col-md-10" id="builder-tests">
+
+			</div>
+			<div class="col-md-2">
+				
+				<div class="form-group">
+					<button type="submit" id="download" class="btn btn-primary">Download</button>
+				</div>
+				<div class="form-group">
+					<button type="button" id="download-config" class="btn btn-info">Download Configuration</button>
+				</div>
+				<div class="form-group">
+					<button type="button" id="download-link" class="btn btn-info">Create permalink</button>
+				</div>
+			</div>
+	</div>
+</form>
+{% raw %}
+<script id="builder-template" type="text/x-handlebars-template">
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th><span class="sr-only">Select</span></th>
+				<th>Test name</th>
+				<th>Guidelines</th>
+				<th>Severity</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each tests}}
+				<tr>
+					<td>
+						<input type="checkbox" id="{{testName}}"/>
+					</td>
+					<td>
+						<label for="{{testName}}">{{title.en}}</label>
+							<p>{{description.en}}</p>
+					</td>
+					<td>
+						{{#each guidelines}}
+
+						{{/each}}
+					</td>
+					<td>
+						{{severity}}
+					</td>
+				</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</script>
+{% endraw %}
