@@ -52,7 +52,20 @@ var quail = {
    * Suspect CSS styles that might indicate a paragarph tag is being used as a header.
    */
   suspectPCSSStyles : ['color', 'font-weight', 'font-size', 'font-family'],
-      
+  
+  /**
+   * Elements that can (naturally) recieve keyboard focus.
+   */
+  focusElements : 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]',
+
+  /**
+   * Regex to find right-to-left or left-to-right characters
+   */
+  textDirection : {
+    rtl : /[\u0600-\u06FF]|[\u0750-\u077F]|[\u0590-\u05FF]|[\uFE70-\uFEFF]/mg,
+    ltr : /[\u0041-\u007A]|[\u00C0-\u02AF]|[\u0388-\u058F]/mg
+  },
+
   /**
    * Main run function for quail. It bundles up some accessibility tests,
    * and if tests are not passed, it instead fetches them using getJSON.
@@ -99,7 +112,7 @@ var quail = {
       var results = {totals : {severe : 0, moderate : 0, suggestion : 0 },
                     results : quail.accessibilityResults };
       $.each(results.results, function(testName, result) {
-        results.totals[quail.testabilityTranslation[quail.accessibilityTests[testName].testability]] += result.length;
+        results.totals[quail.testabilityTranslation[quail.accessibilityTests[testName].testability]] += result.elements.length;
       });
       quail.options.complete(results);
     }
@@ -129,14 +142,15 @@ var quail = {
       }
     }
 
-    quail.accessibilityResults[testName].push($element);
+    quail.accessibilityResults[testName].elements.push($element);
     if(typeof quail.options.testFailed !== 'undefined') {
       var testability = (typeof quail.accessibilityTests[testName].testability !== 'undefined') ?
                      quail.accessibilityTests[testName].testability :
                      'unknown';
-      var severity = 
+      
       quail.options.testFailed({element  : $element,
                              testName    : testName,
+                             test        : quail.accessibilityTests[testName],
                              testability : testability,
                              severity    : quail.testabilityTranslation[testability],
                              options     : options
@@ -156,11 +170,14 @@ var quail = {
         return;
       }
       var testType = quail.accessibilityTests[testName].type;
+      if(typeof quail.accessibilityTests[testName].options === 'undefined') {
+        quail.accessibilityTests[testName].options = { };
+      }
       if(typeof quail.accessibilityResults[testName] === 'undefined') {
-        quail.accessibilityResults[testName] = [ ];
+        quail.accessibilityResults[testName] = { test : quail.accessibilityTests[testName], elements : [ ]};
       }
       if(testType === 'selector') {
-        quail.html.find(quail.accessibilityTests[testName].selector).each(function() {
+        quail.html.find(quail.accessibilityTests[testName].options.selector).each(function() {
           quail.testFails(testName, $(this));
         });
       }
@@ -303,10 +320,10 @@ quail.components.acronym = function(testName, acronymTag) {
   });
 };
 quail.components.color = function(testName, options) {
-  if(options.bodyForegroundAttribute && options.bodyBackgroundAttribute) {
+  if(options.options.bodyForegroundAttribute && options.options.bodyBackgroundAttribute) {
     var $body = quail.html.find('body').clone(false, false);
-    var foreground = $body.attr(options.bodyForegroundAttribute);
-    var background = $body.attr(options.bodyBackgroundAttribute);
+    var foreground = $body.attr(options.options.bodyForegroundAttribute);
+    var background = $body.attr(options.options.bodyBackgroundAttribute);
     if(typeof foreground === 'undefined') {
       foreground = 'rgb(0,0,0)';
     }
@@ -315,15 +332,15 @@ quail.components.color = function(testName, options) {
     }
     $body.css('color', foreground);
     $body.css('background-color', background);
-    if((options.algorithm === 'wcag' && !quail.colors.passesWCAG($body)) ||
-       (options.algorithm === 'wai' && !quail.colors.passesWAI($body))) {
+    if((options.options.algorithm === 'wcag' && !quail.colors.passesWCAG($body)) ||
+       (options.options.algorithm === 'wai' && !quail.colors.passesWAI($body))) {
        quail.testFails(testName, $body);
     }
   }
-  quail.html.find(options.selector).filter(quail.textSelector).each(function() {
+  quail.html.find(options.options.selector).filter(quail.textSelector).each(function() {
     if(!quail.isUnreadable($(this).text()) &&
-       (options.algorithm === 'wcag' && !quail.colors.passesWCAG($(this))) ||
-       (options.algorithm === 'wai' && !quail.colors.passesWAI($(this)))) {
+       (options.options.algorithm === 'wcag' && !quail.colors.passesWCAG($(this))) ||
+       (options.options.algorithm === 'wai' && !quail.colors.passesWAI($(this)))) {
        quail.testFails(testName, $(this));
     }
   });
@@ -369,8 +386,11 @@ quail.colors = {
     return 'rgb(' + data[0] + ',' + data[1] + ',' + data[2] + ')';
   },
 
-  passesWCAG : function(element) {
-    return (quail.colors.getLuminosity(quail.colors.getColor(element, 'foreground'), quail.colors.getColor(element, 'background')) > 5);
+  passesWCAG : function(element, level) {
+    if(typeof level === 'undefined') {
+      level = 5;
+    }
+    return (quail.colors.getLuminosity(quail.colors.getColor(element, 'foreground'), quail.colors.getColor(element, 'background')) > level);
   },
   
   passesWAI : function(element) {
@@ -403,7 +423,7 @@ quail.colors = {
     if(type === 'foreground') {
       return (element.css('color')) ? element.css('color') : 'rgb(255,255,255)';
     }
-    //return (element.css('background-color')) ? element.css('background-color') : 'rgb(0,0,0)';
+    
     if((element.css('background-color') !== 'rgba(0, 0, 0, 0)' &&
         element.css('background-color') !== 'transparent') ||
        element.get(0).tagName === 'body') {
@@ -431,6 +451,9 @@ quail.colors = {
 
 };
 quail.components.convertToPx = function(unit) {
+	if(unit.search('px') > -1) {
+		return parseInt(unit, 10);
+	}
 	var $test = $('<div style="display: none; font-size: 1em; margin: 0; padding:0; height: ' + unit + '; line-height: 1; border:0;">&nbsp;</div>').appendTo(quail.html);
 	var height = $test.height();
 	$test.remove();
@@ -438,13 +461,13 @@ quail.components.convertToPx = function(unit) {
 };
 
 quail.components.event = function(testName, options) {
-  var $items = (typeof options.selector === 'undefined') ?
+  var $items = (typeof options.options.selector === 'undefined') ?
                 quail.html.find('*') :
-                quail.html.find(options.selector);
+                quail.html.find(options.options.selector);
   $items.each(function() {
-    if(quail.components.hasEventListener($(this), options.searchEvent.replace('on', '')) &&
-         (typeof options.correspondingEvent === 'undefined' ||
-         !quail.components.hasEventListener($(this), options.correspondingEvent.replace('on', '')))) {
+    if(quail.components.hasEventListener($(this), options.options.searchEvent.replace('on', '')) &&
+         (typeof options.options.correspondingEvent === 'undefined' ||
+         !quail.components.hasEventListener($(this), options.options.correspondingEvent.replace('on', '')))) {
       quail.testFails(testName, $(this));
     }
   });
@@ -455,24 +478,217 @@ quail.components.hasEventListener = function(element, event) {
 	}
 	return typeof $(element).get(0)[event] !== 'undefined';
 };
-quail.components.header = function(testName, options) {
-  var current = parseInt(options.selector.substr(-1, 1), 10);
-  var nextHeading = false;
-  quail.html.find('h1, h2, h3, h4, h5, h6').each(function() {
-    var number = parseInt($(this).get(0).tagName.substr(-1, 1), 10);
-    if(nextHeading && (number - 1 > current || number + 1 < current)) {
+quail.components.headingLevel = function(testName, options) {
+  var priorLevel = false;
+  quail.html.find(':header').each(function() {
+    var level = parseInt($(this).get(0).tagName.substr(-1, 1), 10);
+    if(priorLevel === options.options.headingLevel && level > priorLevel + 1) {
       quail.testFails(testName, $(this));
     }
-    if(number === current) {
-      nextHeading = $(this);
-    }
-    if(nextHeading && number !== current) {
-      nextHeading = false;
-    }
+    priorLevel = level;
   });
 };
+
+quail.components.htmlSource = {
+
+  getHtml: function(callback) {
+    var that = this;
+    if(typeof quail.options.htmlSource !== 'undefined' && quail.options.htmlSource) {
+      callback(quail.options.htmlSource, that.parseHtml(quail.options.htmlSource));
+      return;
+    }
+    var data = $.ajax({ url : window.location.href, async : false });
+    if(data && typeof data.responseText !== 'undefined') {
+      callback(data.responseText, that.parseHtml(data.responseText));
+    }
+  },
+
+  traverse: function(parsed, callback, number, alreadyCalled) {
+    var that = this;
+    if(typeof alreadyCalled === 'undefined') {
+      callback(parsed, number, false);
+    }
+    if(typeof parsed.children !== 'undefined') {
+      parsed.childCount = 1;
+      $.each(parsed.children, function(index, child) {
+        callback(child, parsed.childCount, parsed);
+        that.traverse(child, callback, parsed.childCount, true);
+        if(child.type === 'tag') {
+          parsed.childCount++;
+        }
+      });
+    }
+    if($.isArray(parsed)) {
+      $.each(parsed, function(index, element) {
+        that.traverse(element, callback);
+      });
+    }
+  },
+
+  addSelector: function(element, childNumber, parent) {
+    if(element.type !== 'tag' || typeof element.name === 'undefined') {
+      return;
+    }
+    if(typeof element.selector === 'undefined') {
+      element.selector = (parent && typeof parent.selector !== 'undefined') ? parent.selector.slice() : [];
+    }
+    else {
+      return;
+    }
+    var selector = element.name;
+    if(typeof element.attributes !== 'undefined') {
+      if(typeof element.attributes.id !== 'undefined') {
+        selector += '#' + element.attributes.id[0];
+      }
+      else {
+        if(typeof element.attributes.class !== 'undefined') {
+          selector += '.' + element.attributes.class[0].replace(/\s/, '.');
+        }
+      }
+    }
+
+    if(childNumber) {
+      selector += ':nth-child('+ childNumber + ')';
+    }
+    element.selector.push(selector);
+    return element.selector;
+  },
+
+  parseHtml: function(html) {
+    if(typeof Tautologistics === 'undefined') {
+      return false;
+    }
+    //NodeHtmlParser chokes on doctype tags
+    html = html.replace(/<!doctype ([^>]*)>/g, '');
+    var handler = new Tautologistics.NodeHtmlParser.HtmlBuilder(function(err, dom) { }, { });
+    var parser = new Tautologistics.NodeHtmlParser.Parser(handler);
+    parser.parseComplete(html);
+    var parsed = handler.dom;
+    var that = this;
+    //Traverse through the HTML objects and add a selector property
+    this.traverse(parsed, that.addSelector);
+    return parsed;
+  }
+};
+
+if(typeof Tautologistics !== 'undefined') {
+  var Mode = {
+      Text: 'text',
+      Tag: 'tag',
+      Attr: 'attr',
+      CData: 'cdata',
+      Comment: 'comment'
+  };
+
+  Tautologistics.NodeHtmlParser.HtmlBuilder.prototype.write = function(element) {
+      // this._raw.push(element);
+      if (this._done) {
+          this.handleCallback(new Error("Writing to the builder after done() called is not allowed without a reset()"));
+      }
+      if (this._options.includeLocation) {
+          if (element.type !== Mode.Attr) {
+              element.location = this._getLocation();
+              this._updateLocation(element);
+          }
+      }
+      if (element.type === Mode.Text && this._options.ignoreWhitespace) {
+          if (HtmlBuilder.reWhitespace.test(element.data)) {
+              return;
+          }
+      }
+      var parent;
+      var node;
+      if (!this._tagStack.last()) { //There are no parent elements
+          //If the element can be a container, add it to the tag stack and the top level list
+          if (element.type === Mode.Tag) {
+              if (element.name.charAt(0) !== "/") { //Ignore closing tags that obviously don't have an opening tag
+                  node = this._copyElement(element);
+                  this.dom.push(node);
+                  if (!this.isEmptyTag(node)) { //Don't add tags to the tag stack that can't have children
+                      this._tagStack.push(node);
+                  }
+                  this._lastTag = node;
+              }
+          } else if (element.type === Mode.Attr && this._lastTag) {
+              if (!this._lastTag.attributes) {
+                  this._lastTag.attributes = {};
+              }
+              if(typeof this._lastTag.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()] === 'undefined') {
+                this._lastTag.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()] = [];
+              }
+              this._lastTag.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()].push(element.data);
+          } else { //Otherwise just add to the top level list
+              this.dom.push(this._copyElement(element));
+          }
+      } else { //There are parent elements
+          //If the element can be a container, add it as a child of the element
+          //on top of the tag stack and then add it to the tag stack
+          if (element.type === Mode.Tag) {
+              if (element.name.charAt(0) === "/") {
+                  //This is a closing tag, scan the tagStack to find the matching opening tag
+                  //and pop the stack up to the opening tag's parent
+                  var baseName = this._options.caseSensitiveTags ?
+                      element.name.substring(1)
+                      :
+                      element.name.substring(1).toLowerCase()
+                      ;
+                  if (!this.isEmptyTag(element)) {
+                      var pos = this._tagStack.length - 1;
+                      while (pos > -1 && this._tagStack[pos--].name !== baseName) { }
+                      if (pos > -1 || this._tagStack[0].name === baseName) {
+                          while (pos < this._tagStack.length - 1) {
+                              this._tagStack.pop();
+                          }
+                      }
+                  }
+              }
+              else { //This is not a closing tag
+                  parent = this._tagStack.last();
+                  if (element.type === Mode.Attr) {
+                      if (!parent.attributes) {
+                          parent.attributes = {};
+                      }
+                      if(typeof parent.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()] === 'undefined') {
+                        parent.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()] = [];
+                      }
+                      parent.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()].push(element.data);
+                  } else {
+                      node = this._copyElement(element);
+                      if (!parent.children) {
+                          parent.children = [];
+                      }
+                      parent.children.push(node);
+                      if (!this.isEmptyTag(node)) { //Don't add tags to the tag stack that can't have children
+                          this._tagStack.push(node);
+                      }
+                      if (element.type === Mode.Tag) {
+                          this._lastTag = node;
+                      }
+                  }
+              }
+          }
+          else { //This is not a container element
+              parent = this._tagStack.last();
+              if (element.type === Mode.Attr) {
+                  if (!parent.attributes) {
+                      parent.attributes = {};
+                  }
+                  if(typeof parent.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()] === 'undefined') {
+                    parent.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()] = [];
+                  }
+                  parent.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()].push(element.data);
+              } else {
+                  if (!parent.children) {
+                      parent.children = [];
+                  }
+                  parent.children.push(this._copyElement(element));
+              }
+          }
+      }
+    };
+   }
 quail.components.label = function(testName, options) {
-  quail.html.find(options.selector).each(function() {
+  quail.html.find(options.options.selector).each(function() {
     if((!$(this).parent('label').length ||
         !quail.containsReadableText($(this).parent('label'))) &&
       (!quail.html.find('label[for=' + $(this).attr('id') + ']').length ||
@@ -482,7 +698,7 @@ quail.components.label = function(testName, options) {
   });
 };
 quail.components.labelProximity = function(testName, options) {
-  quail.html.find(options.selector).each(function() {
+  quail.html.find(options.options.selector).each(function() {
     var $label = quail.html.find('label[for=' + $(this).attr('id') + ']').first();
     if(!$label.length) {
       quail.testFails(testName, $(this));
@@ -493,26 +709,34 @@ quail.components.labelProximity = function(testName, options) {
   });
 };
 quail.components.placeholder = function(testName, options) {
-  quail.html.find(options.selector).each(function() {
-    var text;
-    if(typeof options.attribute !== 'undefined') {
-      if(typeof $(this).attr(options.attribute) === 'undefined' ||
-            (options.attribute === 'tabindex' &&
-              $(this).attr(options.attribute) <= 0
+  quail.html.find(options.options.selector).each(function() {
+    var text = '';
+    if(typeof options.options.attribute !== 'undefined') {
+      if((typeof $(this).attr(options.options.attribute) === 'undefined' ||
+            (options.options.attribute === 'tabindex' &&
+              $(this).attr(options.options.attribute) <= 0
             )
-         ) {
+         ) &&
+         !options.options.content
+        ) {
         quail.testFails(testName, $(this));
         return;
       }
-      text = $(this).attr(options.attribute);
+      else {
+        if($(this).attr(options.options.attribute) && $(this).attr(options.options.attribute) !== 'undefined') {
+          text += $(this).attr(options.options.attribute);
+        }
+      }
     }
-    else {
-      text = $(this).text();
+    if(typeof options.options.attribute === 'undefined' ||
+      !options.options.attribute ||
+      options.options.content) {
+      text += $(this).text();
       $(this).find('img[alt]').each(function() {
         text += $(this).attr('alt');
       });
     }
-    if(typeof text === 'string') {
+    if(typeof text === 'string' && text.length > 0) {
       text = quail.cleanString(text);
       var regex = /^([0-9]*)(k|kb|mb|k bytes|k byte)$/g;
       var regexResults = regex.exec(text.toLowerCase());
@@ -520,7 +744,7 @@ quail.components.placeholder = function(testName, options) {
         quail.testFails(testName, $(this));
       }
       else {
-        if(options.empty && quail.isUnreadable(text)) {
+        if(options.options.empty && quail.isUnreadable(text)) {
           quail.testFails(testName, $(this));
         }
         else {
@@ -531,7 +755,7 @@ quail.components.placeholder = function(testName, options) {
       }
     }
     else {
-      if(options.empty && typeof text !== 'number') {
+      if(options.options.empty && typeof text !== 'number') {
         quail.testFails(testName, $(this));
       }
     }
@@ -819,7 +1043,7 @@ quail.strings.emoticons = [
   ":o"
 ];
 
-quail.strings.language_codes = [
+quail.strings.languageCodes = [
   "bh",
   "bi",
   "nb",
@@ -1061,17 +1285,24 @@ quail.strings.redundant = {
     "*"
   ]
 };
-quail.strings.site_map = [
+quail.strings.siteMap = [
   "site map",
   "map",
   "sitemap"
 ];
-quail.strings.suspicious_links = [
+quail.strings.suspiciousLinks = [
 "click here",
 "click",
 "more",
 "here",
 "read more",
+"download",
+"add",
+"delete",
+"clone",
+"order",
+"view",
+"read",
 "clic aqu&iacute;",
 "clic",
 "haga clic",
@@ -1121,6 +1352,23 @@ quail.aLinkTextDoesNotBeginWithRedundantWord = function() {
   });
 };
 
+quail.aLinkWithNonText = function() {
+	quail.html.find('a:has(img, object, embed)').each(function() {
+		if(!quail.isUnreadable($(this).text())) {
+			return;
+		}
+		var unreadable = 0;
+		$(this).find('img, object, embed').each(function() {
+			if(($(this).is('img') && quail.isUnreadable($(this).attr('alt'))) ||
+				(!$(this).is('img') && quail.isUnreadable($(this).attr('title')))) {
+				unreadable++;
+			}
+		});
+		if($(this).find('img, object, embed').length === unreadable) {
+			quail.testFails('aLinkWithNonText', $(this));
+		}
+	});
+};
 quail.aLinksAreSeperatedByPrintableCharacters = function() {
   quail.html.find('a').each(function() {
     if($(this).next('a').length && quail.isUnreadable($(this).get(0).nextSibling.wholeText)) {
@@ -1153,7 +1401,7 @@ quail.aSuspiciousLinkText = function() {
     $(this).find('img[alt]').each(function() {
       text = text + $(this).attr('alt');
     });
-    if(quail.strings.suspicious_links.indexOf(quail.cleanString(text)) > -1) {
+    if(quail.strings.suspiciousLinks.indexOf(quail.cleanString(text)) > -1) {
       quail.testFails('aSuspiciousLinkText', $(this));
     }
   });
@@ -1214,7 +1462,7 @@ quail.documentLangIsISO639Standard = function() {
   if(!language) {
     return;
   }
-  if(quail.strings.language_codes.indexOf(language) === -1) {
+  if(quail.strings.languageCodes.indexOf(language) === -1) {
       quail.testFails('documentLangIsISO639Standard', quail.html.find('html'));
   }
 };
@@ -1247,6 +1495,33 @@ quail.documentVisualListsAreMarkedUp = function() {
       }
     });
   });
+};
+
+quail.elementsDoNotHaveDuplicateAttributes = function() {
+	quail.components.htmlSource.getHtml(function(html, parsed) {
+		if(!parsed) {
+			return;
+		}
+		quail.components.htmlSource.traverse(parsed, function(element) {
+			if(element.type !== 'tag') {
+				return;
+			}
+			var selector = element.selector.join('>');
+			if(!$.contains(quail.html.get(0), $(selector).get(0))) {
+				return;
+			}
+			if(typeof element.attributes !== 'undefined') {
+				$.each(element.attributes, function(index, attribute) {
+					if(attribute.length > 1) {
+						quail.testFails('elementsDoNotHaveDuplicateAttributes',
+							$(selector).first(),
+							{ attribute : index }
+							);
+					}
+				});
+			}
+		});
+	});
 };
 
 quail.embedHasAssociatedNoEmbed = function() {
@@ -1291,6 +1566,35 @@ quail.emoticonsMissingAbbr = function() {
   });
 };
 
+quail.focusIndicatorVisible = function() {
+	quail.html.find(quail.focusElements).each(function() {
+		var noFocus = {
+			borderWidth : $(this).css('border-width'),
+			borderColor : $(this).css('border-color'),
+			backgroundColor : $(this).css('background-color'),
+			boxShadow : $(this).css('box-shadow')
+		};
+		$(this).focus();
+		if(noFocus.backgroundColor !== $(this).css('background-color')) {
+			$(this).blur();
+			return;
+		}
+		
+		var borderWidth = quail.components.convertToPx($(this).css('border-width'));
+		if(borderWidth > 2 && borderWidth !== quail.components.convertToPx(noFocus.borderWidth)) {
+			$(this).blur();
+			return;
+		}
+		
+		var boxShadow = ($(this).css('box-shadow') && $(this).css('box-shadow') !== 'none') ? $(this).css('box-shadow').match(/(-?\d+px)|(rgb\(.+\))/g) : false;
+		if(boxShadow && $(this).css('box-shadow') !== noFocus.boxShadow && quail.components.convertToPx(boxShadow[3]) > 3) {
+			$(this).blur();
+			return;
+		}
+		$(this).blur();
+		quail.testFails('focusIndicatorVisible', $(this));
+	});
+};
 quail.formWithRequiredLabel = function() {
    var redundant = quail.strings.redundant;
    var lastStyle, currentStyle = false;
@@ -1467,6 +1771,15 @@ quail.inputImageAltNotRedundant = function() {
   });
 };
 
+quail.inputWithoutLabelHasTitle = function() {
+	quail.html.find('input, select, textarea').each(function() {
+		if(!$(this).parent('label').length &&
+			!quail.html.find('label[for=' + $(this).attr('id') + ']').length &&
+			(!$(this).attr('title') || quail.isUnreadable($(this).attr('title')))) {
+			quail.testFails('inputWithoutLabelHasTitle', $(this));
+		}
+	});
+};
 quail.labelMustBeUnique = function() {
   var labels = { };
   quail.html.find('label[for]').each(function() {
@@ -1491,6 +1804,36 @@ quail.labelsAreAssignedToAnInput = function() {
   });
 };
 
+quail.languageDirAttributeIsUsed = function() {
+	var currentDirection = (quail.html.attr('dir')) ? quail.html.attr('dir').toLowerCase() : 'ltr';
+	var oppositeDirection = (currentDirection === 'ltr') ? 'rtl' : 'ltr';
+	quail.html.find('p, blockquote, aside, h1, h2, h3, h4, h5, h6').each(function() {
+		if($(this).attr('dir')) {
+			currentDirection = $(this).attr('dir').toLowerCase();
+		}
+		else {
+			currentDirection = ($(this).parent('[dir]').first().attr('dir')) ? $(this).parent('[dir]').first().attr('dir').toLowerCase() : currentDirection;
+		}
+		if(typeof quail.textDirection[currentDirection] === 'undefined') {
+			currentDirection = 'ltr';
+		}
+		oppositeDirection = (currentDirection === 'ltr') ? 'rtl' : 'ltr';
+		var matches = $(this).text().match(quail.textDirection[oppositeDirection]);
+		if(!matches) {
+			return;
+		}
+		matches = matches.length;
+		$(this).find('[dir=' + oppositeDirection + ']').each(function() {
+			var childMatches = $(this).text().match(quail.textDirection[oppositeDirection]);
+			if(childMatches) {
+				matches = matches - childMatches.length;
+			}
+		});
+		if(matches > 0) {
+			quail.testFails('languageDirAttributeIsUsed', $(this));
+		}
+	});
+};
 quail.listNotUsedForFormatting = function() {
   quail.html.find('ol, ul').each(function() {
     if($(this).find('li').length < 2) {
@@ -1562,7 +1905,7 @@ quail.siteMap = function() {
   var set = true;
   quail.html.find('a').each(function() {
     var text = $(this).text().toLowerCase();
-    $.each(quail.strings.site_map, function(index, string) {
+    $.each(quail.strings.siteMap, function(index, string) {
       if(text.search(string) > -1) {
         set = false;
         return;
@@ -1737,5 +2080,20 @@ quail.videosEmbeddedOrLinkedNeedCaptions = function() {
     });
   });
 };
+
+quail.whiteSpaceInWord = function() {
+	var whitespaceGroup, nonWhitespace;
+	quail.html.find(quail.textSelector).each(function() {
+		nonWhitespace = ($(this).text()) ? $(this).text().match(/[^\s\\]/g) : false;
+		whitespaceGroup = ($(this).text()) ? $(this).text().match(/[^\s\\]\s[^\s\\]/g) : false;
+		if(nonWhitespace && 
+				whitespaceGroup &&
+				whitespaceGroup.length > 3 &&
+				whitespaceGroup.length >= (nonWhitespace.length / 2) - 2) {
+					quail.testFails('whiteSpaceInWord', $(this));
+		}
+	});
+};
+
 
 })(jQuery);
