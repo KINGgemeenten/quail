@@ -1,105 +1,180 @@
 (function($) {
-	var config = {};
-	var quailParts = ['components', 'strings', 'custom'];
-	var jsHead = [
-		'/*! QUAIL quailjs.org | quailjs.org/license */',
-		'/*! Built with the Quail builder at quailjs.org/build */',
-		';(function($) {'
-	];
+	var quailBuilder = {
+   
+		config: { 
+			tests: { },
+			components: { },
+			strings: { },
+			libraries: { },
+			custom: { }
+		},
 
-	$.getJSON('/dist/tests.min.json', function(tests) {
-		var updateConfig = function() {
-			config = { tests: { },
+		jsHead: [
+			'/*! QUAIL quailjs.org | quailjs.org/license */',
+			'/*! Built with the Quail builder at quailjs.org/build */',
+			';(function($) {'
+		],
+
+		tests: {},
+
+		templateTests: [],
+
+		js: [],
+
+		quailParts: ['components', 'strings', 'custom'],
+
+		severityLabels : {
+			0			: { name: 'Suggestion', class: 'success' },
+			0.5		: { name: 'Moderate', class: 'primary' },
+			1			: { name: 'Severe', class: 'danger' }
+	  },
+
+		run: function() {
+			var that = this;
+			$.getJSON('/dist/tests.min.json', function(tests) {
+				that.tests = tests;
+				that.displayTests(tests);
+				$('#builder :checkbox').on('change', function(event) { 
+					event.preventDefault();
+					that.updateConfig()
+				});
+				$('#download-link').on('click keyup', function(event) { 
+					event.preventDefault();
+					that.createPermalink()
+				});
+				$('#builder').on('submit', function(event) {
+					event.preventDefault();
+					that.download();
+				});
+				$('#download-config').on('click keyup', function(event) {
+					event.preventDefault();
+					that.downloadConfig();
+				});
+			});
+		},
+
+		displayTests: function(tests) {
+			var that = this;
+			var template = Handlebars.compile($('#builder-template').html());
+			
+			$.each(tests, function(testName, test) {
+				test.template = { name : testName}
+				that.addTestGuidelines(test);
+				test.template.severity = that.severityLabels[test.testability];
+				that.templateTests.push(test);
+			});
+
+			var gistId = window.location.hash.replace('#', '').trim();
+			if(gistId.length) {
+				this.updateConfig();
+				$.ajax({
+		      url: 'https://api.github.com/gists/' + gistId,
+		      type: 'GET',
+		      dataType: 'json',
+		      success : function(data) {
+		      	that.config = JSON.parse(data.files['quail-config.json'].content);
+				  	that.updateForm();
+		      }
+		    });
+			}
+			console.log(that.templateTests);
+			$('#builder-tests').prepend(template({ tests: that.templateTests }));
+		},
+
+		addTestGuidelines : function(test) {
+			test.template.guidelines = [];
+			if(typeof test.guidelines === 'undefined' || $.isEmptyObject(test.guidelines)) {
+				return;
+			}
+			$.each(test.guidelines, function(guidelineName, guideline) {
+				if(guidelineName === '508') {
+					test.template.guidelines.push({
+						"508" : 1,
+						name : 'Section 508',
+						sections : guideline
+					});
+				}
+				if(guidelineName === 'wcag') {
+					var g = { wcag : 1, name : 'WCAG 2.0', sc : [ ] };
+					$.each(guideline, function(sc, techniques) {
+						g.sc.push({
+							sc : sc,
+							technique: techniques
+						})
+					});
+					test.template.guidelines.push(g);
+				}
+			});
+		},
+
+		updateConfig: function() {
+			var that = this;
+			this.config = { tests: { },
 								 components: { },
 								 strings: { },
 								 libraries: { },
 								 custom: { }
 								 };
-			$.each(tests, function(testName, test) {
+			$.each(that.tests, function(testName, test) {
 				if(!$('#' + testName).is(':checked')) {
 					return;
 				}
-					delete test.testName;
-					config.tests[testName] = test;
+				delete test.template;
+				that.config.tests[testName] = test;
 				if(typeof test.components !== 'undefined') {
 					$.each(test.components, function(index, component) {
-						config.components[component] = component;
+						that.config.components[component] = component;
 					});
 				}
 				if(test.type == 'custom') {
-					config.custom[testName] = testName;
+					that.config.custom[testName] = testName;
 				}
 				if(typeof test.strings !== 'undefined') {
 					$.each(test.strings, function(index, strings) {
 						var string = (strings.search(/\./) !== -1) ? strings.substr(0, strings.search(/\./)) : strings;
-						config.strings[string] = string;
+						that.config.strings[string] = string;
 					});
 				}
 			});
-		};
+		},
 
-		var updateForm = function() {
+		updateForm: function() {
+			this.hideMessage();
 			$(':checkbox').each(function() {
 				$(this).removeAttr('checked');
 			})
-			$.each(config.tests, function(testName, test) {
+			$.each(this.config.tests, function(testName, test) {
 				$('#' + testName + ':checkbox').attr('checked', 'checked');
 			});
-		}
+		},
 
-		var processedTests = [];
-		var template = Handlebars.compile($('#builder-template').html());
-		$.each(tests, function(testName, test) {
-			test.testName = testName;
-			test.finalGuidelines = [];
-			processedTests.push(test);
-		});
-		var gistId = window.location.hash.replace('#', '').trim();
-		if(gistId.length) {
-			updateConfig();
-			$.ajax({
-	      url: 'https://api.github.com/gists/' + gistId,
-	      type: 'GET',
-	      dataType: 'json',
-	      success : function(data) {
-	      	config = JSON.parse(data.files['quail-config.json'].content);
-			  	updateForm();
-	      }
-	    });
-		}
-
-		$('#builder-tests').prepend(template({ tests: processedTests }));
-		$('#builder').on('submit', function(event) {
-			console.log(event);
-			updateConfig();
-			var js = jsHead;
-			js.push('window.quailTests = ' + JSON.stringify(config.tests, null, 2) + ';');
+		download: function() {
+			this.hideMessage();
+			var that = this;
+			this.updateConfig();
+			this.js = this.jsHead;
+			this.js.push('var quailBuilderTests = ' + JSON.stringify(this.config.tests, null, 2) + ';');
 			var core = $.ajax({ async: false, url: '/src/js/core.js' });
-			js.push(core.responseText);
-			$.each(quailParts, function(index, part) {
-				$.each(config[part], function(quailPart) {
+			this.js.push(core.responseText);
+			$.each(this.quailParts, function(index, part) {
+				$.each(that.config[part], function(quailPart) {
 					var code = $.ajax({ async: false, url: '/src/js/' + part + '/' + quailPart + '.js'});
-					js.push(code.responseText);
+					that.js.push(code.responseText);
 				});				
 			});
-			js.push('})(jQuery);');
-			var blob = new Blob([js.join("\n")], {type: "text/javascript;charset=utf-8"});
+			this.js.push('})(jQuery);');
+			var blob = new Blob([this.js.join("\n")], {type: "text/javascript;charset=utf-8"});
 			saveAs(blob, "quail-custom.js");
-		});
-		$('#download-config').on('click keyup', function(event) {
-			event.preventDefault();
-			updateConfig();
-			var blob = new Blob([JSON.stringify(config, null, 2)], {type: "text/json;charset=utf-8"});
-			saveAs(blob, "quail-config.json");
-		});
-		$('#download-link').on('click keyup', function(event) {
-			event.preventDefault();
+		},
+
+		createPermalink: function() {
+			this.hideMessage();
 			var data = {
 	      "description": "Quail builder configuration",
 	      "public": true,
 	      "files": {
 	        "quail-config.json": {
-	          "content": JSON.stringify(config, null, 2)
+	          "content": JSON.stringify(this.config, null, 2)
 	        }
 	      }
 	    }
@@ -113,9 +188,26 @@
 	      window.location.hash = result.id;
 	    })
 	    .error(function(err) {
-	      showError('<strong>Ruh roh!</strong> Could not save gist file, configuration not saved.', err)
+	      this.showError('danger', '<strong>Uh oh!</strong> Could not save gist file, configuration not saved.', err)
 	    })
-		});
-		$('#builder :checkbox').on('change', updateConfig);
+		},
+
+		downloadConfig : function() {
+			this.updateConfig();
+			var blob = new Blob([JSON.stringify(this.config, null, 2)], {type: "text/json;charset=utf-8"});
+			saveAs(blob, "quail-config.json");
+		},
+
+		showMessage : function(type, message) {
+			var template = Handlebars.compile($('#builder-message').html());
+			$('#builder').before(template({ type: type, message: message }));
+		},
+
+		hideMessage : function() {
+			$('#current-message').remove();
+		}
+	};
+	$(document).ready(function() {
+		quailBuilder.run();
 	});
 })(jQuery);

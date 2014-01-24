@@ -12,24 +12,31 @@ Quail comes with over <a href="/tests">200 tests</a>, but you probably don't wan
 </p>
 <form id="builder">
 	<div class="row">
-			<div class="col-md-10" id="builder-tests">
+			<div class="col-md-10" id="builder-tests" aria-live="polite">
 
 			</div>
 			<div class="col-md-2">
-				
-				<div class="form-group">
-					<button type="submit" id="download" class="btn btn-primary">Download</button>
-				</div>
-				<div class="form-group">
-					<button type="button" id="download-config" class="btn btn-info">Download Configuration</button>
-				</div>
-				<div class="form-group">
-					<button type="button" id="download-link" class="btn btn-info">Create permalink</button>
+				<div class="sticky">
+					<div class="form-group">
+						<button type="submit" id="download" class="btn btn-primary">Download JavaScript</button>
+					</div>
+					<div class="form-group">
+						<button type="button" id="download-config" class="btn btn-info">Download Configuration</button>
+					</div>
+					<div class="form-group">
+						<button type="button" id="download-link" class="btn btn-info">Create permalink</button>
+					</div>
 				</div>
 			</div>
 	</div>
 </form>
 {% raw %}
+<script id="builder-message" type="text/x-handlebars-template">
+	<div class="alert alert-dismissable alert-{{type}}" id="current-message">
+		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+		{{{message}}}
+	</div>
+</script>
 <script id="builder-template" type="text/x-handlebars-template">
 	<table class="table table-striped">
 		<thead>
@@ -44,19 +51,37 @@ Quail comes with over <a href="/tests">200 tests</a>, but you probably don't wan
 			{{#each tests}}
 				<tr>
 					<td>
-						<input type="checkbox" id="{{testName}}"/>
+						<input type="checkbox" id="{{template.name}}"/>
 					</td>
 					<td>
-						<label for="{{testName}}">{{title.en}}</label>
+						<label for="{{template.name}}">{{title.en}}</label>
 							<p>{{description.en}}</p>
 					</td>
 					<td>
-						{{#each guidelines}}
-
-						{{/each}}
+						{{#if template.guidelines }}
+							{{#each template.guidelines }}
+								<h6>{{name}}</h6>
+								<ul class="list-unstyled">
+									{{#if wcag }}
+										{{#each sc }}
+											<li>
+												<strong>{{sc}}:</strong> 
+												{{#each technique}}
+													{{this}}
+												{{/each}}
+											</li>
+										{{/each}}
+									{{else}}
+										{{#each sections}}
+											<li>{{this}}</li>
+										{{/each}}
+									{{/if}}
+								</ul>
+							{{/each}}
+						{{/if}}
 					</td>
 					<td>
-						{{severity}}
+						<span class="label label-{{template.severity.class}}">{{template.severity.name}}</span>
 					</td>
 				</tr>
 			{{/each}}
