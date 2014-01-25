@@ -3,7 +3,7 @@
     var messages = { imgHasAlt : 'Your images are missing alt text here. Better fix that.',
                      documentAbbrIsUsed : 'This abbreviation needs to be wrapped in an abbr or acronym tag.'
     };
-    if(typeof $.fn.sticky === 'undefined') {
+    if(typeof $.fn.sticky !== 'undefined') {
       $(".sticky").sticky({topSpacing: 15});
     }
     $('.demonstration').quail({jsonPath : '/dist', 
