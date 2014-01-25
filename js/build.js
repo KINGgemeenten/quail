@@ -77,7 +77,6 @@
 		      }
 		    });
 			}
-			console.log(that.templateTests);
 			$('#builder-tests').prepend(template({ tests: that.templateTests }));
 		},
 
