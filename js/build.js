@@ -50,6 +50,10 @@
 					event.preventDefault();
 					that.downloadConfig();
 				});
+				$('.guideline:checkbox').on('change', function(event) {
+					event.preventDefault();
+					that.filterGuidelines();
+				});
 			});
 		},
 
@@ -77,7 +81,7 @@
 		      }
 		    });
 			}
-			$('#builder-tests').prepend(template({ tests: that.templateTests }));
+			$('#builder-tests').append(template({ tests: that.templateTests }));
 		},
 
 		addTestGuidelines : function(test) {
@@ -145,6 +149,16 @@
 			$.each(this.config.tests, function(testName, test) {
 				$('#' + testName + ':checkbox').attr('checked', 'checked');
 			});
+		},
+
+		filterGuidelines: function() {
+			var guidelines = [];
+			$('.guideline:checkbox').each(function() {
+				if($(this).is(':checked')) {
+					guidelines.push($(this).val());
+				}
+			});
+			console.log(guidelines);
 		},
 
 		download: function() {

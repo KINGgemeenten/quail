@@ -13,7 +13,22 @@ Quail comes with over <a href="/tests">200 tests</a>, but you probably don't wan
 <form id="builder">
 	<div class="row">
 			<div class="col-md-10" id="builder-tests" aria-live="polite">
-
+				<div class="form-inline">
+					<div class="form-group">
+				    <label class="sr-only" for="search">Search</label>
+				    <input type="email" class="form-control" id="search" placeholder="Search">
+				  </div>
+				  <div class="checkbox">
+				    <label>
+				      <input type="checkbox" class="guideline" value="wcag" checked="checked"> WCAG 2.0
+				    </label>
+				  </div>
+				  <div class="checkbox">
+				    <label>
+				      <input type="checkbox" class="guideline" value="508" checked="checked"> Section 508
+				    </label>
+				  </div>
+				</div>
 			</div>
 			<div class="col-md-2">
 				<div class="sticky">
@@ -38,7 +53,7 @@ Quail comes with over <a href="/tests">200 tests</a>, but you probably don't wan
 	</div>
 </script>
 <script id="builder-template" type="text/x-handlebars-template">
-	<table class="table table-striped">
+	<table class="test-table table table-striped">
 		<thead>
 			<tr>
 				<th><span class="sr-only">Select</span></th>
