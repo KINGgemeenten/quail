@@ -50,6 +50,10 @@
 					event.preventDefault();
 					that.downloadConfig();
 				});
+				$('.edit-text').on('click keyup', function(event) {
+					event.preventDefault();
+					that.testConfiguration($(this));
+				});
 				$('.guideline:checkbox').on('change', function(event) {
 					event.preventDefault();
 					that.filterGuidelines();
@@ -143,11 +147,13 @@
 
 		updateForm: function() {
 			this.hideMessage();
+			var that = this;
 			$(':checkbox').each(function() {
 				$(this).removeAttr('checked');
-			})
+			});
 			$.each(this.config.tests, function(testName, test) {
 				$('#' + testName + ':checkbox').attr('checked', 'checked');
+				that.updateRowStrings(testName, test);
 			});
 		},
 
@@ -158,7 +164,6 @@
 					guidelines.push($(this).val());
 				}
 			});
-			console.log(guidelines);
 		},
 
 		download: function() {
@@ -203,6 +208,32 @@
 	    .error(function(err) {
 	      this.showError('danger', '<strong>Uh oh!</strong> Could not save gist file, configuration not saved.', err)
 	    })
+		},
+
+		testConfiguration : function($link) {
+			$('#builder-modal-display').remove();
+			var test = this.tests[$link.data('test')];
+			var that = this;
+			var template = Handlebars.compile($('#builder-modal').html());
+			$('#builder').after(template({ test: test, testName : $link.data('test') }));
+			$('#builder-modal-display').modal();
+			$('#builder-modal-display form').on('submit', function(event) {
+				event.preventDefault();
+				var testName = $('#modal-test').val();
+				that.tests[testName].title.en = $('#modal-title').val();
+				that.tests[testName].description.en = $('#modal-content').val();
+				that.updateRowStrings(testName, that.tests[testName]);
+				if(typeof that.config.tests[testName] !== 'undefined') {
+					that.config.tests[testName] = that.tests[testName];
+				}
+				$('#builder-modal-display').modal('hide');
+			});
+		},
+
+		updateRowStrings : function(testName, test) {
+				$('#' + testName + '-row label').html(test.title.en);
+				$('#' + testName + '-row .description').html(test.description.en);
+				$('#' + testName + '-row .edit-text').prepend('<span class="glyphicon glyphicon-comment"></span><span class="sr-only">Edited</span> ');
 		},
 
 		downloadConfig : function() {
